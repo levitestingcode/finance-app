@@ -9,6 +9,12 @@ const category = document.getElementById('category');
 const modal = document.getElementById('modal');
 const addBtn = document.getElementById('add-btn');
 const closeBtn = document.querySelector('.close-btn');
+const submitBtn = form.querySelector('.btn');
+
+// --- KONFIGURASI ---
+// REPLACE THIS WITH YOUR OWN DEPLOYED GOOGLE APPS SCRIPT URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbzfAgqYbhWAhLNlaVIMwiF2QgfAzgb9C13JfsNXhHJZBnq_8qY-Rm78ahKeSzJnh8kq/exec';
+// -------------------
 
 // Icon mapping
 const categoryIcons = {
@@ -21,43 +27,96 @@ const categoryIcons = {
     'Lainnya': 'fa-solid fa-money-bill-transfer'
 };
 
-const localStorageTransactions = JSON.parse(
-    localStorage.getItem('transactions')
-);
+let transactions = [];
 
-let transactions =
-    localStorage.getItem('transactions') !== null ? localStorageTransactions : [];
+// Fetch transactions from Google Sheets
+async function getTransactions() {
+    if (API_URL === 'PASTE_YOUR_WEB_APP_URL_HERE') {
+        alert('Please configure your API_URL in script.js first!');
+        return;
+    }
+
+    // Show loading indicator
+    list.innerHTML = '<p style="text-align:center; margin-top:20px;">Loading data...</p>';
+
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        transactions = data;
+        init();
+    } catch (err) {
+        console.error(err);
+        list.innerHTML = '<p style="text-align:center; color:red; margin-top:20px;">Failed to load data.</p>';
+    }
+}
 
 // Add transaction functionality
-function addTransaction(e) {
+async function addTransaction(e) {
     e.preventDefault();
 
     if (text.value.trim() === '' || amount.value.trim() === '') {
         alert('Please add a text and amount');
-    } else {
-        const transaction = {
-            id: generateID(),
-            text: text.value,
-            amount: +amount.value,
-            category: category.value,
-            date: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-        };
+        return;
+    }
 
-        transactions.push(transaction);
+    const transaction = {
+        id: generateID(),
+        text: text.value,
+        amount: +amount.value,
+        category: category.value,
+        date: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    };
 
-        addTransactionDOM(transaction);
+    // Optimistic UI Update (Show immediately)
+    transactions.push(transaction);
+    addTransactionDOM(transaction);
+    updateValues();
 
-        updateValues();
+    // Close modal immediately
+    toggleModal();
+    text.value = '';
+    amount.value = '';
 
-        updateLocalStorage();
+    // Background Sync
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = 'Saving...';
+    submitBtn.disabled = true;
 
-        text.value = '';
-        amount.value = '';
-        // Reset category to default (optional)
-        category.value = 'Makanan';
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'add',
+                transaction: transaction
+            })
+        });
+    } catch (err) {
+        console.error('Failed to save', err);
+        alert('Failed to save to Google Sheets (Network Error)');
+    } finally {
+        submitBtn.innerText = originalText;
+        submitBtn.disabled = false;
+    }
+}
 
-        // Close modal
-        toggleModal();
+// Remove transaction by ID
+async function removeTransaction(id) {
+    // Optimistic UI Update
+    transactions = transactions.filter(transaction => transaction.id !== id);
+    init();
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'delete',
+                id: id
+            })
+        });
+    } catch (err) {
+        console.error('Failed to delete', err);
+        alert('Failed to delete from Google Sheets');
     }
 }
 
@@ -81,7 +140,7 @@ function addTransactionDOM(transaction) {
     if (transaction.category && categoryIcons[transaction.category]) {
         iconClass = categoryIcons[transaction.category];
     } else {
-        // Fallback for old data or direct text matching
+        // Fallback
         if (transaction.text.toLowerCase().includes('makan') || transaction.text.toLowerCase().includes('food')) {
             iconClass = 'fa-solid fa-utensils';
         } else if (transaction.text.toLowerCase().includes('belanja') || transaction.text.toLowerCase().includes('shopping')) {
@@ -107,7 +166,6 @@ function addTransactionDOM(transaction) {
     list.appendChild(item);
 }
 
-
 // Update the balance, income and expense
 function updateValues() {
     const amounts = transactions.map(transaction => transaction.amount);
@@ -128,24 +186,9 @@ function updateValues() {
     money_minus.innerText = `-Rp ${expense.toLocaleString('id-ID')}`;
 }
 
-// Remove transaction by ID
-function removeTransaction(id) {
-    transactions = transactions.filter(transaction => transaction.id !== id);
-
-    updateLocalStorage();
-
-    init();
-}
-
-// Update local storage transactions
-function updateLocalStorage() {
-    localStorage.setItem('transactions', JSON.stringify(transactions));
-}
-
 // Init app
 function init() {
     list.innerHTML = '';
-
     transactions.forEach(addTransactionDOM);
     updateValues();
 }
@@ -166,4 +209,5 @@ window.addEventListener('click', (e) => {
 
 form.addEventListener('submit', addTransaction);
 
-init();
+// Initial Fetch
+getTransactions();
