@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatat Keuangan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User" class="avatar">
+                <div class="greeting">
+                    <span>Selamat Datang,</span>
+                    <h3>Sufinewaj</h3>
+                </div>
+            </div>
+            <button class="notification-btn"><i class="fa-solid fa-bell"></i></button>
+        </header>
+
+        <!-- Balance Card -->
+        <section class="balance-card">
+            <span class="label">Total Saldo</span>
+            <h1 id="balance">Rp 0</h1>
+            <div class="circle-decoration"></div>
+            <div class="circle-decoration-2"></div>
+        </section>
+
+        <!-- Income/Expense Summary -->
+        <section class="inc-exp-container">
+            <div class="inc-exp-card income">
+                <div class="icon-bg">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </div>
+                <div>
+                    <span class="label">Pemasukan</span>
+                    <p id="money-plus" class="money plus">+Rp 0</p>
+                </div>
+            </div>
+            <div class="inc-exp-card expense">
+                <div class="icon-bg">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </div>
+                <div>
+                    <span class="label">Pengeluaran</span>
+                    <p id="money-minus" class="money minus">-Rp 0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Desktop Add Button -->
+        <button id="desktop-add-btn" class="btn desktop-add-btn"><i class="fa-solid fa-plus"></i> Tambah
+            Transaksi</button>
+
+        <!-- Recent Transactions -->
+        <section class="recent-transactions">
+            <div class="section-header">
+                <h3>Transaksi Terakhir</h3>
+                <button class="see-all">Lihat Semua</button>
+            </div>
+
+            <ul id="list" class="list">
+                <!-- Transactions will be added here dynamically -->
+                <!-- Example Item -->
+                <!-- <li class="minus">
+                    <div class="txn-icon shopping">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <div class="txn-info">
+                        <h4>Belanja Bulanan</h4>
+                        <small>10:00 AM</small>
+                    </div>
+                    <span class="txn-amount">-Rp 320.000</span>
+                </li> -->
+            </ul>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i>
+            </a>
+            <div class="nav-item-add">
+                <button id="add-btn" class="add-btn">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-credit-card"></i>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Add Transaction Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Tambah Transaksi</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <form id="form">
+                <div class="form-control">
+                    <label for="text">Keterangan</label>
+                    <input type="text" id="text" placeholder="Contoh: Makan Siang..." required>
+                </div>
+                <div class="form-control">
+                    <label for="category">Kategori</label>
+                    <select id="category" required>
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Belanja">Belanja</option>
+                        <option value="Transportasi">Transportasi</option>
+                        <option value="Hiburan">Hiburan</option>
+                        <option value="Tagihan">Tagihan</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label for="amount">Jumlah <br><small>(negatif - pengeluaran, positif - pemasukan)</small></label>
+                    <input type="number" id="amount" placeholder="Contoh: -50000" required>
+                </div>
+                <button class="btn">Tambah Transaksi</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
